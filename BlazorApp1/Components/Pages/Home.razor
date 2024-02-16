@@ -1,0 +1,120 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Zegar, Kalendarz i Lokalizacja</title>
+    <style>
+        body {
+            font-family: "Courier New", monospace;
+            background-color: black; /* Ustawienie koloru tła na czarny */
+        }
+
+        div#clock {
+            font-size: 50px;
+            color: lime;
+            font-weight: bold;
+        }
+
+        div#calendar {
+            font-size: 30px;
+            color: lime;
+            font-weight: bold;
+        }
+
+        div#ipAddress {
+            font-size: 25px;
+            color: lime;
+            font-weight: bold;
+        }
+
+        div#localIpAddress {
+            font-size: 25px;
+            color: lime;
+            font-weight: bold;
+        }
+
+        div#location {
+            font-size: 25px;
+            color: lime;
+            font-weight: bold;
+        }
+
+        div#country {
+            font-size: 25px;
+            color: lime;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        // Funkcja do wyświetlania aktualnej daty i czasu
+        function displayTime() {
+            var now = new Date();
+            var time = now.toLocaleTimeString();
+            document.getElementById('clock').innerHTML = time;
+        }
+
+        // Funkcja do wyświetlania aktualnej daty w formacie liczbowym
+        function displayDate() {
+            var now = new Date();
+            var day = now.getDate();
+            var month = now.getMonth() + 1; // Miesiące są numerowane od 0, więc dodajemy 1
+            var year = now.getFullYear();
+            var formattedDate = day + '.' + month + '.' + year;
+            document.getElementById('calendar').innerHTML = formattedDate;
+        }
+
+        // Funkcja do wyświetlania adresu IP, lokalizacji i kraju
+        async function displayIPAndLocation() {
+            try {
+                // Pobranie adresu IP użytkownika
+                const ipResponse = await fetch('https://api64.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const ipAddress = ipData.ip;
+                document.getElementById('ipAddress').innerHTML = "Twój adres IP: " + ipAddress;
+
+                // Pobranie lokalizacji użytkownika (wymaga udzielenia zgody przez użytkownika)
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var latitude = position.coords.latitude;
+                        var longitude = position.coords.longitude;
+                        document.getElementById('location').innerHTML = "Twoja lokalizacja: " + latitude + ", " + longitude;
+                    });
+                } else {
+                    document.getElementById('location').innerHTML = "Twoja lokalizacja jest niedostępna.";
+                }
+
+                // Pobranie informacji o kraju na podstawie adresu IP
+                const locationResponse = await fetch('http://ip-api.com/json/' + ipAddress + '?fields=country');
+                const locationData = await locationResponse.json();
+
+                if (locationData.country) {
+                    const countryName = locationData.country;
+                    document.getElementById('country').innerHTML = "Kraj: " + countryName;
+                } else {
+                    document.getElementById('country').innerHTML = "Kraj nieznany";
+                }
+            } catch (error) {
+                console.error('Wystąpił błąd: ', error);
+            }
+        }
+
+        // Aktualizuj czas i datę co sekundę
+        setInterval(displayTime, 1000);
+        setInterval(displayDate, 1000);
+
+        // Wywołaj funkcję do wyświetlania adresu IP, lokalizacji i kraju
+        displayIPAndLocation();
+    </script>
+</head>
+<body>
+    <div id="clock"></div>
+    <div id="calendar"></div>
+    <div id="ipAddress"></div>
+    <div id="localIpAddress"></div>
+    <div id="location"></div>
+    <div id="country"></div>
+</body>
+</html>
